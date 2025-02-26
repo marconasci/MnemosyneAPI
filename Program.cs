@@ -1,6 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using MnemosyneAPI.Context;
+using MnemosyneAPI.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Minha API",
-        Version = "v1"
+        Title = "Mnemosyne API",
+        Version = "v1",
+        Description = "API desenvolvida no curso de Programação com C# para atender ao Frontend do site Mnemosyne"
     });
 });
 
@@ -25,8 +27,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minha API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mnemosyne API v1");
     });
 }
+
+app.MapMemoriesEndpoints();
 
 app.Run();
