@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using FluentValidation.Internal;
+using Microsoft.EntityFrameworkCore;
 using MnemosyneAPI.Context;
 using MnemosyneAPI.Model;
 
@@ -20,10 +22,15 @@ namespace MnemosyneAPI.Endpoints
                     : Results.NotFound();
             });
 
-            app.MapPost("/memories", async (Memory memory, MemoriesDbContext db) =>
+
+            app.MapPost("/memories", async (Memory memory, IValidator<Memory> validator, MemoriesDbContext db) =>
             {
                 if (memory != null)
                 {
+                    var validation = await validator.ValidateAsync(memory);
+
+                    if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
+
                     db.Memories.Add(memory);
                     await db.SaveChangesAsync();
 
@@ -33,6 +40,7 @@ namespace MnemosyneAPI.Endpoints
             })
                 .Produces<Memory>(StatusCodes.Status201Created)
                 .Produces(StatusCodes.Status400BadRequest);
+
 
             app.MapDelete("/memories/{id}", async(int id, MemoriesDbContext db) =>
             {
@@ -47,10 +55,15 @@ namespace MnemosyneAPI.Endpoints
                 .Produces<Memory>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);
 
-            app.MapPut("memories/{id}", async(int id, Memory memory, MemoriesDbContext db) =>
+
+            app.MapPut("memories/{id}", async(int id, Memory memory, IValidator<Memory> validator, MemoriesDbContext db) =>
             {
                 var memoriaEncontrada = await db.Memories.FindAsync(id);
                 if (memoriaEncontrada is null) return Results.NotFound();
+
+                var validation = await validator.ValidateAsync(memory);
+
+                if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
 
                 memoriaEncontrada.Title = memory.Title;
                 memoriaEncontrada.Description = memory.Description;

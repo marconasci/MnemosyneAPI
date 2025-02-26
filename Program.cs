@@ -2,8 +2,12 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using MnemosyneAPI.Context;
 using MnemosyneAPI.Endpoints;
+using FluentValidation;
+using MnemosyneAPI.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddValidatorsFromAssemblyContaining<MemoryValidator>();
 
 builder.Services.AddDbContext<MemoriesDbContext>(options =>
     options.UseSqlite("Data Source=memories.db"));
